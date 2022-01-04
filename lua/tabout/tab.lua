@@ -76,14 +76,6 @@ local backward_tab = function()
 end
 
 M.can_tabout = function(dir)
-    local tab_action
-
-    if dir == "forward" then
-        tab_action = forward_tab
-    else
-        tab_action = backward_tab
-    end
-
     logger.debug(dir)
     if not can_tabout() then
         return false
