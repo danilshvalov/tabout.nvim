@@ -75,7 +75,49 @@ local backward_tab = function()
     end
 end
 
-M.can_tabout = can_tabout
+M.can_tabout = function(dir)
+    local tab_action
+
+    if dir == "forward" then
+        tab_action = forward_tab
+    else
+        tab_action = backward_tab
+    end
+
+    logger.debug(dir)
+    if not can_tabout() then
+        return false
+    end
+    logger.debug(dir .. " allowed")
+
+    local n = node.get_node_at_cursor(dir)
+    -- no need to tabout if we are on root level
+    if not n or not n:parent() then
+        return false
+    end
+
+    local line, col = node.get_tabout_position(n, dir, false)
+
+    -- just trigger the tab action if there is no target for a tabout
+    if not line then
+        if config.debug then
+            local node_line, node_col = nil, nil
+            if dir == "forward" then
+                node_line, node_col = n:end_()
+            else
+                node_line, node_col = n:start()
+            end
+            logger.debug(dir .. " error")
+            if config.debug then
+                debug_node(node_line, node_col, n)
+            end
+        end
+
+        return false
+    end
+
+    return true
+end
 
 ---@param dir string | "'forward'" | "'backward'"
 ---@param enabled boolean
